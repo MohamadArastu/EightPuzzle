@@ -6,7 +6,7 @@ Introduction to AI:
 Heuristic Search - 8-puzzle Problem Documentation
 
 Group Members: 
-Mohamad Arastu
-Enes Berk
-Martin Fuhrmann
+Mohamad Arastu,
+Enes Berk,
+Martin Fuhrmann,
 Laura N. Davidowicz
