@@ -1,4 +1,5 @@
 # Misplaced Tiles - Heuristic Function
+
 def print_in_matrix(matrix):  # correct 3x3 Matrix
     for i in range(9):
         if i % 3 == 0 and i > 0:
@@ -6,15 +7,15 @@ def print_in_matrix(matrix):  # correct 3x3 Matrix
         print(str(matrix[i]) + " ", end="")
 
 
-def count(s):  # Counts the amount of misplaced tiles
+def count(n):  # Counts the amount of misplaced tiles
     c = 0
-    goal = [0, 1, 2,
-            3, 4, 5,
-            6, 7, 8]
+    goal = [1, 2, 3,
+            4, 5, 6,
+            7, 0, 8]
     # goal is our solved puzzle to be compared to
 
     for i in range(9):
-        if s[i] != 0 and s[i] != goal[i]:
+        if n[i] != 0 and n[i] != goal[i]:
             # s[i] != 0 ensures that Zero won't count as heuristic value because 0 is just the empty space
             c += 1
     # counts the total number of tiles that are not in the correct place
@@ -43,9 +44,9 @@ def move(ar, p, st):
     return store_st, rh  # return the heuristic and the state
 
 
-start = [7, 2, 4,
+start = [1, 2, 3,
          5, 0, 6,
-         8, 3, 1]
+         4, 7, 8]
 # starting point of the 8-puzzle
 
 h = count(start)  # h = heuristic value
