@@ -1,12 +1,11 @@
 # EightPuzzle
 8 Puzzle AI Project 
 
-Introduction to AI: 
+## Introduction to AI: 
+## Heuristic Search - 8-puzzle Problem Documentation
 
-Heuristic Search - 8-puzzle Problem Documentation
-
-Group Members: 
-Mohamad Arastu,
-Enes Berk,
-Martin Fuhrmann,
-Laura N. Davidowicz
+### Group Members: 
+- Mohamad Arastu
+- Enes Berk
+- Martin Fuhrmann
+- Laura N. Davidowicz

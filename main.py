@@ -1,89 +1,93 @@
-def print_in_format(matrix):
+# Misplaced Tiles - Heuristic Function
+def print_in_matrix(matrix):  # correct 3x3 Matrix
     for i in range(9):
         if i % 3 == 0 and i > 0:
             print("")
         print(str(matrix[i]) + " ", end="")
 
 
-def count(s):
+def count(s):  # Counts the amount of misplaced tiles
     c = 0
-    ideal = [0, 1, 2,
-             3, 4, 5,
-             6, 7, 8]
+    goal = [0, 1, 2,
+            3, 4, 5,
+            6, 7, 8]
+    # goal is our solved puzzle to be compared to
 
     for i in range(9):
-        if s[i] != 0 and s[i] != ideal[i]:
+        if s[i] != 0 and s[i] != goal[i]:
+            # s[i] != 0 ensures that Zero won't count as heuristic value because 0 is just the empty space
             c += 1
+    # counts the total number of tiles that are not in the correct place
     return c
 
 
 def move(ar, p, st):
-    rh = 9999
-    store_st = st.copy()
+    rh = 9999  # max value of heuristic
+    store_st = st.copy()  # state copy to store the state
 
     for i in range(len(ar)):
 
-        dupl_st = st.copy()
+        dupl_st = st.copy()  # state duplication
 
-        tmp = dupl_st[p]
+        # swapping the value of 0 with the value of the position of 0
+        temp = dupl_st[p]
         dupl_st[p] = dupl_st[arr[i]]
-        dupl_st[arr[i]] = tmp
+        dupl_st[arr[i]] = temp
 
-        trh = count(dupl_st)
+        temp_rh = count(dupl_st)  # calculation of the heuristic state
 
-        if trh < rh:
-            rh = trh
-            store_st = dupl_st.copy()
+        if temp_rh < rh:
+            rh = temp_rh  # replace the heuristic
+            store_st = dupl_st.copy()  # replace the state
 
-    # print(rh, store_st)
-
-    return store_st, rh
+    return store_st, rh  # return the heuristic and the state
 
 
-state = [7, 2, 4,
+start = [7, 2, 4,
          5, 0, 6,
          8, 3, 1]
 
-h = count(state)
+h = count(start)  # h = heuristic value
 Level = 1
 
-print("\n------ Level " + str(Level) + " ------")
-print_in_format(state)
+print("\nLevel " + str(Level))
+print_in_matrix(start)
 print("\nHeuristic Value(Misplaced) : " + str(h))
 
 while h > 0:
-    pos = int(state.index(0))
+    pos = int(start.index(0))
 
     Level += 1
 
+    # in a 3x3 Matrix at Position X the empty space can move either right, left, down or up depending on the position
     if pos == 0:
         arr = [1, 3]
-        state, h = move(arr, pos, state)
+        start, h = move(arr, pos, start)
     elif pos == 1:
         arr = [0, 2, 4]
-        state, h = move(arr, pos, state)
+        start, h = move(arr, pos, start)
     elif pos == 2:
         arr = [1, 5]
-        state, h = move(arr, pos, state)
+        start, h = move(arr, pos, start)
     elif pos == 3:
         arr = [0, 4, 6]
-        state, h = move(arr, pos, state)
+        start, h = move(arr, pos, start)
     elif pos == 4:
         arr = [1, 3, 5, 7]
-        state, h = move(arr, pos, state)
+        start, h = move(arr, pos, start)
     elif pos == 5:
         arr = [2, 4, 8]
-        state, h = move(arr, pos, state)
+        start, h = move(arr, pos, start)
     elif pos == 6:
         arr = [3, 7]
-        state, h = move(arr, pos, state)
+        start, h = move(arr, pos, start)
     elif pos == 7:
         arr = [4, 6, 8]
-        state, h = move(arr, pos, state)
+        start, h = move(arr, pos, start)
     elif pos == 8:
         arr = [5, 6]
-        state, h = move(arr, pos, state)
+        start, h = move(arr, pos, start)
 
-    print("\n------ Level " + str(Level) + " ------")
-    print_in_format(state)
+    print("\nLevel " + str(Level))
+    print_in_matrix(start)
     print("\nHeuristic Value(Misplaced) : " + str(h))
