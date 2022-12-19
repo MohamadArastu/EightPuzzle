@@ -7,7 +7,7 @@ def print_in_matrix(matrix):  # correct 3x3 Matrix
         print(str(matrix[i]) + " ", end="")
 
 
-def count(n):  # Counts the amount of misplaced tiles
+def count(n):  # Counts the number of misplaced tiles
     c = 0
     goal = [1, 2, 3,
             4, 5, 6,
