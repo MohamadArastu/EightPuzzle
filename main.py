@@ -46,6 +46,7 @@ def move(ar, p, st):
 start = [7, 2, 4,
          5, 0, 6,
          8, 3, 1]
+# starting point of the 8-puzzle
 
 h = count(start)  # h = heuristic value
 Level = 1
