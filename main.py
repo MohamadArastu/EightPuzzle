@@ -40,7 +40,7 @@ class State:
 
     # Returns array of possible moves from given state
     def get_next_states(self):
-        moves = []
+        next_states = []
 
         pos = self.pos
 
@@ -69,9 +69,9 @@ class State:
             # swapping the value of 0 with the value of the position of 0
             grid_copy[pos] = self.grid[arr[i]]
             grid_copy[arr[i]] = 0
-            moves.append(State(grid_copy, self.moves + 1))
+            next_states.append(State(grid_copy, self.moves + 1))
 
-        return moves  # return the possible new states
+        return next_states  # return the possible new states
 
 
 class PriorityQueue:
@@ -178,30 +178,41 @@ def get_random_start_nodes(n):
 
 
 if __name__ == '__main__':
-    start_nodes = get_random_start_nodes(2)
+    number_of_puzzles = 2
+    start_nodes = get_random_start_nodes(number_of_puzzles)
     expanded_nodes = []
+    time_per_node = []
 
     cost_hamming = lambda state: state.moves + hamming_distance(state)
     cost_manhattan = lambda state: state.moves + manhattan_distance(state)
 
-    start = time.time()
     for node in start_nodes:
+        start = time.time()
         solution, history_length = search(State(node, 0), cost_hamming)
         expanded_nodes.append(history_length)
-    end = time.time()
+        end = time.time()
+        time_per_node.append(end - start)
+
     print("Hamming heuristic:")
-    print("Time: " + str(end - start) + "s")
+    print("Mean Time per Puzzle: " + str(statistics.mean(time_per_node)) + "s")
+    print("Standard Deviation of Time per Puzzle: " + str(statistics.stdev(time_per_node)) + "s")
     print("Mean Value (Expanded Nodes): " + str(statistics.mean(expanded_nodes)) + " nodes")
     print("Standard Deviation (Expanded Nodes): " + str(statistics.stdev(expanded_nodes)) + " nodes")
     print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
 
-    start = time.time()
+
     expanded_nodes.clear()
+    time_per_node.clear()
     for node in start_nodes:
+        start = time.time()
         solution, history_length = search(State(node, 0), cost_manhattan)
         expanded_nodes.append(history_length)
-    end = time.time()
-    print("Manhattan heuristic: " + str(end - start) + "s")
-    print("Time: " + str(end - start) + "s")
+        end = time.time()
+        time_per_node.append(end - start)
+
+    print("Manhattan heuristic:")
+    print("Mean Time per Puzzle: " + str(statistics.mean(time_per_node)) + "s")
+    print("Standard Deviation of Time per Puzzle: " + str(statistics.stdev(time_per_node)) + "s")
     print("Mean Value (Expanded Nodes): " + str(statistics.mean(expanded_nodes)) + " nodes")
     print("Standard Deviation (Expanded Nodes): " + str(statistics.stdev(expanded_nodes)) + " nodes")
+
