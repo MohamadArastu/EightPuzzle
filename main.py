@@ -5,14 +5,19 @@ import random
 import time
 import statistics
 
-
+# Class representing a puzzle state
 class State:
 
     def __init__(self, grid, moves):
+        # Array with current grid
         self.grid = grid
+        # number og moves to get from initial state to current state
         self.moves = moves
+
         self.pos = int(self.grid.index(0))
 
+    # Definition of "<" operator
+    # Needed to add new state to heap when another state in the heap has the same cost function
     def __lt__(self, other):
         if self.moves < other.moves:
             return True
@@ -38,7 +43,7 @@ class State:
                 return False
         return True
 
-    # Returns array of possible moves from given state
+    # Returns array of possible moves considering the current state
     def get_next_states(self):
         next_states = []
 
@@ -64,16 +69,19 @@ class State:
             arr = [5, 6]
 
         for i in range(len(arr)):
-            grid_copy = self.grid.copy()  # state duplication
+            # state duplication
+            grid_copy = self.grid.copy()
 
             # swapping the value of 0 with the value of the position of 0
             grid_copy[pos] = self.grid[arr[i]]
             grid_copy[arr[i]] = 0
             next_states.append(State(grid_copy, self.moves + 1))
 
-        return next_states  # return the possible new states
+        # return the possible new states
+        return next_states
 
 
+# Heap containing all expanded nodes, node with minimum total costs is at the top and is removed by pop function
 class PriorityQueue:
     def __init__(self, heuristic_function):
         self.heuristic_function = heuristic_function
@@ -96,7 +104,7 @@ def hamming_distance(state):
     return len([i for i in range(len(state.grid)) if state.grid[i] != 0 and state.grid[i] != i + 1])
 
 
-# Sums up the deviations of all tiles from goal state
+# Sums up the deviations of all tiles from its goal state
 def manhattan_distance(state):
     def distance(i):
         return 0 if state.grid[i] == 0 else abs(((state.grid[i] - 1) / 3) - (i / 3)) + abs(
@@ -105,30 +113,36 @@ def manhattan_distance(state):
     return sum(distance(i) for i in range(len(state.grid)))
 
 
+# Here the actual search is performed
 def search(state, cost_function):
+    # History is containing all expanded nodes
     history = []
     queue = PriorityQueue(cost_function)
+    # Intitial state is pushe to heap
     queue.push(state)
     history = set([str(state.grid)])
 
     while not queue.empty():
         state = queue.pop()
         if state.is_goal_state():
+            # Goal state has been found
             return (state, len(history))
 
         for st in state.get_next_states():
             grid = str(st.grid)
+            # Check whether node is already known
             if grid not in history:
-                # print(st.grid)
+                # New node is added to history
                 history.add(grid)
+                # New node is pushed to heap
                 queue.push(st)
             else:
+                # Node is already known and can be deleted
                 del st
     return None
 
 
-# A utility function to count
-# inversions in given array 'arr[]'
+# A utility function to count Inversions in given array 'arr[]'
 def getInvCount(arr):
     inv_count = 0
     empty_value = 0
@@ -139,8 +153,7 @@ def getInvCount(arr):
     return inv_count
 
 
-# This function returns true
-# if given 8 puzzle is solvable.
+# This function returns true if given 8 puzzle is solvable.
 # https://www.geeksforgeeks.org/check-instance-8-puzzle-solvable/
 def isSolvable(node):
     puzzle = []
@@ -155,6 +168,7 @@ def isSolvable(node):
     return inv_count % 2 == 0
 
 
+# Random node is generated
 def get_random_start_node():
     options = [0, 1, 2, 3, 4, 5, 6, 7, 8]
     random_node = []
@@ -167,6 +181,7 @@ def get_random_start_node():
     return random_node
 
 
+# Array of random nodes is generated (only containing solveable puzzles)
 def get_random_start_nodes(n):
     start_nodes = []
 
@@ -178,14 +193,20 @@ def get_random_start_nodes(n):
 
 
 if __name__ == '__main__':
+    # Number of puzzles to be solved
     number_of_puzzles = 2
+    # Creation of random puzzles array
     start_nodes = get_random_start_nodes(number_of_puzzles)
+    # Array to store number of extended nodes per puzzle
     expanded_nodes = []
+    # Array to store execution time per puzzle
     time_per_node = []
 
+    # Cost functions: total costs = number of actions to get to current state + heuristic value to reach final state
     cost_hamming = lambda state: state.moves + hamming_distance(state)
     cost_manhattan = lambda state: state.moves + manhattan_distance(state)
 
+    # Solving all puzzles
     for node in start_nodes:
         start = time.time()
         solution, history_length = search(State(node, 0), cost_hamming)
@@ -193,6 +214,7 @@ if __name__ == '__main__':
         end = time.time()
         time_per_node.append(end - start)
 
+    # Presentation of the performance of the hamming heuristic
     print("Hamming heuristic:")
     print("Mean Time per Puzzle: " + str(statistics.mean(time_per_node)) + "s")
     print("Standard Deviation of Time per Puzzle: " + str(statistics.stdev(time_per_node)) + "s")
@@ -200,9 +222,10 @@ if __name__ == '__main__':
     print("Standard Deviation (Expanded Nodes): " + str(statistics.stdev(expanded_nodes)) + " nodes")
     print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
 
-
+    # Clearing arrays for new heuristic
     expanded_nodes.clear()
     time_per_node.clear()
+    # Solving all puzzles
     for node in start_nodes:
         start = time.time()
         solution, history_length = search(State(node, 0), cost_manhattan)
@@ -210,6 +233,7 @@ if __name__ == '__main__':
         end = time.time()
         time_per_node.append(end - start)
 
+    # Presentation of the performance of the manhattan heuristic
     print("Manhattan heuristic:")
     print("Mean Time per Puzzle: " + str(statistics.mean(time_per_node)) + "s")
     print("Standard Deviation of Time per Puzzle: " + str(statistics.stdev(time_per_node)) + "s")
