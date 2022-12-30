@@ -1,95 +1,207 @@
-# Misplaced Tiles - Heuristic Function
-
-def print_in_matrix(matrix):  # correct 3x3 Matrix
-    for i in range(9):
-        if i % 3 == 0 and i > 0:
-            print("")
-        print(str(matrix[i]) + " ", end="")
-
-
-def count(n):  # Counts the number of misplaced tiles
-    c = 0
-    goal = [1, 2, 3,
-            4, 5, 6,
-            7, 0, 8]
-    # goal is our solved puzzle to be compared to
-
-    for i in range(9):
-        if n[i] != 0 and n[i] != goal[i]:
-            # s[i] != 0 ensures that Zero won't count as heuristic value because 0 is just the empty space
-            c += 1
-    # counts the total number of tiles that are not in the correct place
-    return c
+# Eight Puzzle Problem (Comparison of Hamming and Manhattan Distance)
+import heapq
+import sys
+import random
+import time
+import statistics
 
 
-def move(ar, p, st):
-    rh = 9999  # max value of heuristic
-    store_st = st.copy()  # state copy to store the state
+class State:
 
-    for i in range(len(ar)):
+    def __init__(self, grid, moves):
+        self.grid = grid
+        self.moves = moves
+        self.pos = int(self.grid.index(0))
 
-        dupl_st = st.copy()  # state duplication
+    def __lt__(self, other):
+        if self.moves < other.moves:
+            return True
+        return False
 
-        # swapping the value of 0 with the value of the position of 0
-        temp = dupl_st[p]
-        dupl_st[p] = dupl_st[arr[i]]
-        dupl_st[arr[i]] = temp
+    def __eq__(self, other):
+        if self.grid == other.grid:
+            return True
+        return False
 
-        temp_rh = count(dupl_st)  # calculation of the heuristic state
+    # Prints current state
+    def print_grid(self):
+        for i in range(9):
+            if i % 3 == 0 and i > 0:
+                print("")
+            print(str(self.grid[i]) + " ", end="")
+        print("")
 
-        if temp_rh < rh:
-            rh = temp_rh  # replace the heuristic
-            store_st = dupl_st.copy()  # replace the state
+    # Check whether goal state has been reached
+    def is_goal_state(self):
+        for i in range(9):
+            if self.grid[i] != i:
+                return False
+        return True
 
-    return store_st, rh  # return the heuristic and the state
+    # Returns array of possible moves from given state
+    def get_next_states(self):
+        moves = []
+
+        pos = self.pos
+
+        if pos == 0:
+            arr = [1, 3]
+        elif pos == 1:
+            arr = [0, 2, 4]
+        elif pos == 2:
+            arr = [1, 5]
+        elif pos == 3:
+            arr = [0, 4, 6]
+        elif pos == 4:
+            arr = [1, 3, 5, 7]
+        elif pos == 5:
+            arr = [2, 4, 8]
+        elif pos == 6:
+            arr = [3, 7]
+        elif pos == 7:
+            arr = [4, 6, 8]
+        elif pos == 8:
+            arr = [5, 6]
+
+        for i in range(len(arr)):
+            grid_copy = self.grid.copy()  # state duplication
+
+            # swapping the value of 0 with the value of the position of 0
+            grid_copy[pos] = self.grid[arr[i]]
+            grid_copy[arr[i]] = 0
+            moves.append(State(grid_copy, self.moves + 1))
+
+        return moves  # return the possible new states
 
 
-start = [1, 2, 3,
-         5, 0, 6,
-         4, 7, 8]
-# starting point of the 8-puzzle
+class PriorityQueue:
+    def __init__(self, heuristic_function):
+        self.heuristic_function = heuristic_function
+        self.heap = []
 
-h = count(start)  # h = heuristic value
-Level = 1
+    def push(self, item):
+        # print(self.heuristic_function(item))
+        heapq.heappush(self.heap, (self.heuristic_function(item), item))
 
-print("\nLevel " + str(Level))
-print_in_matrix(start)
-print("\nHeuristic Value(Misplaced) : " + str(h))
+    def pop(self):
+        (_, item) = heapq.heappop(self.heap)
+        return item
 
-while h > 0:
-    pos = int(start.index(0))
+    def empty(self):
+        return len(self.heap) == 0
 
-    Level += 1
 
-    # in a 3x3 Matrix at Position X the empty space can move either right, left, down or up depending on the position
-    if pos == 0:
-        arr = [1, 3]
-        start, h = move(arr, pos, start)
-    elif pos == 1:
-        arr = [0, 2, 4]
-        start, h = move(arr, pos, start)
-    elif pos == 2:
-        arr = [1, 5]
-        start, h = move(arr, pos, start)
-    elif pos == 3:
-        arr = [0, 4, 6]
-        start, h = move(arr, pos, start)
-    elif pos == 4:
-        arr = [1, 3, 5, 7]
-        start, h = move(arr, pos, start)
-    elif pos == 5:
-        arr = [2, 4, 8]
-        start, h = move(arr, pos, start)
-    elif pos == 6:
-        arr = [3, 7]
-        start, h = move(arr, pos, start)
-    elif pos == 7:
-        arr = [4, 6, 8]
-        start, h = move(arr, pos, start)
-    elif pos == 8:
-        arr = [5, 6]
-        start, h = move(arr, pos, start)
+# Counts the number of misplaced tiles
+def hamming_distance(state):
+    return len([i for i in range(len(state.grid)) if state.grid[i] != 0 and state.grid[i] != i + 1])
 
-    print("\nLevel " + str(Level))
-    print_in_matrix(start)
-    print("\nHeuristic Value(Misplaced) : " + str(h))
+
+# Sums up the deviations of all tiles from goal state
+def manhattan_distance(state):
+    def distance(i):
+        return 0 if state.grid[i] == 0 else abs(((state.grid[i] - 1) / 3) - (i / 3)) + abs(
+            ((state.grid[i] - 1) % 3) - (i % 3))
+
+    return sum(distance(i) for i in range(len(state.grid)))
+
+
+def search(state, cost_function):
+    history = []
+    queue = PriorityQueue(cost_function)
+    queue.push(state)
+    history = set([str(state.grid)])
+
+    while not queue.empty():
+        state = queue.pop()
+        if state.is_goal_state():
+            return (state, len(history))
+
+        for st in state.get_next_states():
+            grid = str(st.grid)
+            if grid not in history:
+                # print(st.grid)
+                history.add(grid)
+                queue.push(st)
+            else:
+                del st
+    return None
+
+
+# A utility function to count
+# inversions in given array 'arr[]'
+def getInvCount(arr):
+    inv_count = 0
+    empty_value = 0
+    for i in range(0, 9):
+        for j in range(i + 1, 9):
+            if arr[j] != empty_value and arr[i] != empty_value and arr[i] > arr[j]:
+                inv_count += 1
+    return inv_count
+
+
+# This function returns true
+# if given 8 puzzle is solvable.
+# https://www.geeksforgeeks.org/check-instance-8-puzzle-solvable/
+def isSolvable(node):
+    puzzle = []
+    puzzle.append(node[0:3])
+    puzzle.append(node[3:6])
+    puzzle.append(node[6:9])
+
+    # Count inversions in given 8 puzzle
+    inv_count = getInvCount([j for sub in puzzle for j in sub])
+
+    # return true if inversion count is even.
+    return inv_count % 2 == 0
+
+
+def get_random_start_node():
+    options = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+    random_node = []
+
+    while len(options) > 0:
+        c = random.choice(options)
+        random_node.insert(0, c)
+        options.remove(c)
+
+    return random_node
+
+
+def get_random_start_nodes(n):
+    start_nodes = []
+
+    while len(start_nodes) < n:
+        node = get_random_start_node()
+        if (isSolvable(node) and node not in start_nodes):
+            start_nodes.append(node)
+    return start_nodes
+
+
+if __name__ == '__main__':
+    start_nodes = get_random_start_nodes(2)
+    expanded_nodes = []
+
+    cost_hamming = lambda state: state.moves + hamming_distance(state)
+    cost_manhattan = lambda state: state.moves + manhattan_distance(state)
+
+    start = time.time()
+    for node in start_nodes:
+        solution, history_length = search(State(node, 0), cost_hamming)
+        expanded_nodes.append(history_length)
+    end = time.time()
+    print("Hamming heuristic:")
+    print("Time: " + str(end - start) + "s")
+    print("Mean Value (Expanded Nodes): " + str(statistics.mean(expanded_nodes)) + " nodes")
+    print("Standard Deviation (Expanded Nodes): " + str(statistics.stdev(expanded_nodes)) + " nodes")
+    print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+
+    start = time.time()
+    expanded_nodes.clear()
+    for node in start_nodes:
+        solution, history_length = search(State(node, 0), cost_manhattan)
+        expanded_nodes.append(history_length)
+    end = time.time()
+    print("Manhattan heuristic: " + str(end - start) + "s")
+    print("Time: " + str(end - start) + "s")
+    print("Mean Value (Expanded Nodes): " + str(statistics.mean(expanded_nodes)) + " nodes")
+    print("Standard Deviation (Expanded Nodes): " + str(statistics.stdev(expanded_nodes)) + " nodes")
