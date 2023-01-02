@@ -5,6 +5,7 @@ import random
 import time
 import statistics
 
+
 # Class representing a puzzle state
 class State:
 
@@ -101,16 +102,19 @@ class PriorityQueue:
 
 # Counts the number of misplaced tiles
 def hamming_distance(state):
-    return len([i for i in range(len(state.grid)) if state.grid[i] != 0 and state.grid[i] != i + 1])
+    sum = 0
+    for count, tile in enumerate(state.grid):
+        if count == tile:
+            sum += 1
+    return len(state.grid) - sum
 
 
 # Sums up the deviations of all tiles from its goal state
 def manhattan_distance(state):
-    def distance(i):
-        return 0 if state.grid[i] == 0 else abs(((state.grid[i] - 1) / 3) - (i / 3)) + abs(
-            ((state.grid[i] - 1) % 3) - (i % 3))
-
-    return sum(distance(i) for i in range(len(state.grid)))
+    sum = 0
+    for count, tile in enumerate(state.grid):
+        sum += abs(tile % 3 - count % 3) + abs(tile // 3 - count // 3)
+    return sum
 
 
 # Here the actual search is performed
@@ -194,7 +198,7 @@ def get_random_start_nodes(n):
 
 if __name__ == '__main__':
     # Number of puzzles to be solved
-    number_of_puzzles = 2
+    number_of_puzzles = 10
     # Creation of random puzzles array
     start_nodes = get_random_start_nodes(number_of_puzzles)
     # Array to store number of extended nodes per puzzle
@@ -239,4 +243,3 @@ if __name__ == '__main__':
     print("Standard Deviation of Time per Puzzle: " + str(statistics.stdev(time_per_node)) + "s")
     print("Mean Value (Expanded Nodes): " + str(statistics.mean(expanded_nodes)) + " nodes")
     print("Standard Deviation (Expanded Nodes): " + str(statistics.stdev(expanded_nodes)) + " nodes")
-
